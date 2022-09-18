@@ -1,5 +1,5 @@
-# API_hh
-1) взять API hh.ru 
+# API_weather
+1) взять API openweathermap.org
 2) собрать json данные из API
 3) поднять в докере rabbitmq
 4) отправлять собираемые данные из API во входную очередь рэббита

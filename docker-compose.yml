@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+
+  rabbitmq:
+    image: 'rabbitmq:3.6-management-alpine'
+    container_name: 'rabbitmq'
+    ports:
+      # The standard AMQP protocol port
+      - '5672:5672'
+      # HTTP management UI
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest

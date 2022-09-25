@@ -14,6 +14,8 @@ def download():
         json.dump(r, filename)
     print("Файл успешно скачан")
 
+    return r
+
 
 def create_connection_db():
     try:

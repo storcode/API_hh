@@ -1,1 +1,0 @@
-"city = Cheboksary; temperature = 19.33 \u00b0C; pressure = 1002 \u043c\u043c.\u0440\u0442.\u0441\u0442.; humidity = 94 %"

@@ -64,7 +64,6 @@ def insert_json_db(date_downloads, time_downloads, r):
                                       host="127.0.0.1",
                                       port="5432",
                                       database="postgres")
-        connection.autocommit = True
         print("Подключение к базе PostgreSQL для добавления json выполнено")
         cursor = connection.cursor()
         cursor.execute("INSERT INTO public.weather (date_downloads,time_downloads,coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,id,name,cod)"

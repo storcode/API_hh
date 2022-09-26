@@ -2,6 +2,7 @@ import requests
 import psycopg2
 import json
 from psycopg2 import OperationalError
+from datetime import datetime
 
 
 def download():
@@ -9,12 +10,16 @@ def download():
     key_appid = key.key_appid
     url = f'https://api.openweathermap.org/data/2.5/weather?q=Cheboksary,ru&APPID={key_appid}&units=metric'
     r = requests.get(url=url).json()
+    date_downloads = datetime.today().strftime("%Y-%m-%d")
+    time_downloads = datetime.today().strftime("%H:%M:%S")
+    print(date_downloads)
+    print(time_downloads)
 
     with open('weather_city.json', 'w') as filename:
         json.dump(r, filename)
     print("Файл успешно скачан")
 
-    return r
+    return date_downloads, time_downloads, r
 
 
 def create_connection_db():
@@ -27,7 +32,9 @@ def create_connection_db():
         print("Подключение к базе PostgreSQL выполнено")
         cursor = connection.cursor()
         create_table_query = '''CREATE TABLE IF NOT EXISTS public.weather (
-                        id_weather int4 GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                        id_weather int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                        date_downloads date,
+                        time_downloads time,
                         coord json,
                         weather json,
                         base text,
@@ -35,13 +42,14 @@ def create_connection_db():
                         visibility text,
                         wind json,
                         clouds json,
-                        dt int4,
+                        dt int,
                         sys json,
-                        timezone int4,
-                        id int4,
+                        timezone int,
+                        id int,
                         name text,
-                        cod int4
+                        cod int
                         ); '''
+
         cursor.execute(create_table_query)
         connection.commit()
         print("Таблица успешно создана")
@@ -49,22 +57,25 @@ def create_connection_db():
         print(f"Произошла ошибка {e}")
 
 
-def insert_json_db(r):
+def insert_json_db(date_downloads, time_downloads, r):
     try:
         connection = psycopg2.connect(user="postgres",
                                       password="postgres",
                                       host="127.0.0.1",
                                       port="5432",
                                       database="postgres")
+        connection.autocommit = True
         print("Подключение к базе PostgreSQL для добавления json выполнено")
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO public.weather (coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,id,name,cod)"
-                       "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                       (json.dumps(r["coord"]), json.dumps(r["weather"]), r["base"], json.dumps(r["main"]), r["visibility"], json.dumps(r["wind"]),
+        cursor.execute("INSERT INTO public.weather (date_downloads,time_downloads,coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,id,name,cod)"
+                       "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                       (date_downloads["date_downloads"], time_downloads["time_downloads"],
+                        json.dumps(r["coord"]), json.dumps(r["weather"]), r["base"], json.dumps(r["main"]), r["visibility"], json.dumps(r["wind"]),
                         json.dumps(r["clouds"]), r["dt"], json.dumps(r["sys"]), r["timezone"], r["id"], r["name"], r["cod"]))
         connection.commit()
         count = cursor.rowcount
         print(count, "Запись успешно вставлена в таблицу")
+        print("Соединение с PostgreSQL закрыто")
     except (Exception, psycopg2.Error) as error:
         print("Не удалось вставить данные в таблицу", error)
     finally:
@@ -75,5 +86,5 @@ def insert_json_db(r):
 
 
 create_connection_db()
-resp = download()
-insert_json_db(resp)
+date, time, resp = download()
+insert_json_db(date, time, resp)

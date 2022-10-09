@@ -8,6 +8,7 @@ from psycopg2 import OperationalError
 from datetime import datetime
 
 
+
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()

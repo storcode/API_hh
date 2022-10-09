@@ -11,8 +11,17 @@ from datetime import datetime
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
-    channel.queue_declare(queue='hello')
-    channel.basic_consume(queue='hello', on_message_callback=do_work, auto_ack=True)
+
+    channel.queue_declare(queue='connection_db')
+
+    # def callback(ch, method, properties, body):
+    #     print(" [x] Received %r" % body)
+    def do_work():
+        create_connection_db()
+        date, time, resp = download()
+        insert_json_db(date, time, resp)
+
+    channel.basic_consume(queue='connection_db', on_message_callback=do_work(), auto_ack=True)
 
     print(' [*] Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
@@ -77,13 +86,11 @@ def insert_json_db(date_downloads, time_downloads, r):
                                       database="postgres")
         print("Подключение к базе PostgreSQL для добавления json выполнено")
         cursor = connection.cursor()
-        cursor.execute(
-            "INSERT INTO public.weather (date_downloads,time_downloads,coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,id,name,cod)"
-            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-            (date_downloads, time_downloads,
-             json.dumps(r["coord"]), json.dumps(r["weather"]), r["base"], json.dumps(r["main"]), r["visibility"],
-             json.dumps(r["wind"]),
-             json.dumps(r["clouds"]), r["dt"], json.dumps(r["sys"]), r["timezone"], r["id"], r["name"], r["cod"]))
+        cursor.execute("INSERT INTO public.weather (date_downloads,time_downloads,coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,id,name,cod)"
+                       "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                       (date_downloads, time_downloads,
+                        json.dumps(r["coord"]), json.dumps(r["weather"]), r["base"], json.dumps(r["main"]), r["visibility"], json.dumps(r["wind"]),
+                        json.dumps(r["clouds"]), r["dt"], json.dumps(r["sys"]), r["timezone"], r["id"], r["name"], r["cod"]))
         connection.commit()
         count = cursor.rowcount
         print(count, "Запись успешно вставлена в таблицу")
@@ -96,10 +103,7 @@ def insert_json_db(date_downloads, time_downloads, r):
             print("Соединение с PostgreSQL закрыто")
 
 
-def do_work():
-    create_connection_db()
-    date, time, resp = download()
-    insert_json_db(date, time, resp)
+
 
 
 if __name__ == '__main__':

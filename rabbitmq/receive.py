@@ -8,7 +8,6 @@ from psycopg2 import OperationalError
 from datetime import datetime
 
 
-
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
@@ -22,7 +21,7 @@ def main():
         date, time, resp = download()
         insert_json_db(date, time, resp)
 
-    channel.basic_consume(queue='connection_db', on_message_callback=do_work(), auto_ack=True)
+    channel.basic_consume(queue='connection_db', on_message_callback=do_work, auto_ack=True)
 
     print(' [*] Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
@@ -102,9 +101,6 @@ def insert_json_db(date_downloads, time_downloads, r):
             cursor.close()
             connection.close()
             print("Соединение с PostgreSQL закрыто")
-
-
-
 
 
 if __name__ == '__main__':

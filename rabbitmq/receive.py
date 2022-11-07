@@ -12,11 +12,9 @@ def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
 
-    channel.queue_declare(queue='connection_db')
+    channel.queue_declare(queue='connection_db', durable=True)  # нужно убедиться, что очередь переживет перезапуск RabbitMQ, для этого нам нужно объявить его устойчивым
 
-    # def callback(ch, method, properties, body):
-    #     print(" [x] Received %r" % body)
-    def do_work():
+    def do_work(ch, method, properties, body):
         create_connection_db()
         date, time, resp = download()
         insert_json_db(date, time, resp)
@@ -86,11 +84,13 @@ def insert_json_db(date_downloads, time_downloads, r):
                                       database="postgres")
         print("Подключение к базе PostgreSQL для добавления json выполнено")
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO public.weather (date_downloads,time_downloads,coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,id,name,cod)"
-                       "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                       (date_downloads, time_downloads,
-                        json.dumps(r["coord"]), json.dumps(r["weather"]), r["base"], json.dumps(r["main"]), r["visibility"], json.dumps(r["wind"]),
-                        json.dumps(r["clouds"]), r["dt"], json.dumps(r["sys"]), r["timezone"], r["id"], r["name"], r["cod"]))
+        cursor.execute(
+            "INSERT INTO public.weather (date_downloads,time_downloads,coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,id,name,cod)"
+            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            (date_downloads, time_downloads,
+             json.dumps(r["coord"]), json.dumps(r["weather"]), r["base"], json.dumps(r["main"]), r["visibility"],
+             json.dumps(r["wind"]),
+             json.dumps(r["clouds"]), r["dt"], json.dumps(r["sys"]), r["timezone"], r["id"], r["name"], r["cod"]))
         connection.commit()
         count = cursor.rowcount
         print(count, "Запись успешно вставлена в таблицу")

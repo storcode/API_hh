@@ -3,7 +3,7 @@ import pika
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 channel = connection.channel()
-channel.queue_declare(queue='connection_db', durable=True)
+channel.queue_declare(queue='connection_db', durable=True)  # нужно убедиться, что очередь переживет перезапуск RabbitMQ, для этого нам нужно объявить его устойчивым
 channel.basic_publish(
     exchange='',
     routing_key='connection_db',

@@ -1,5 +1,3 @@
-cron_docker
-Dockerfile
 key_appid.py
 weather_city.json
 .idea

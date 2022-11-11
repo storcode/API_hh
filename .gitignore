@@ -4,3 +4,4 @@ key_appid.py
 weather_city.json
 .idea
 __pycache__
+pgdata

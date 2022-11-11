@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 def main():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
     channel = connection.channel()
 
     channel.queue_declare(queue='connection_db', durable=True)  # нужно убедиться, что очередь переживет перезапуск RabbitMQ, для этого нам нужно объявить его устойчивым
@@ -44,7 +44,7 @@ def create_connection_db():
     try:
         connection = psycopg2.connect(user="postgres",
                                       password="postgres",
-                                      host="127.0.0.1",
+                                      host="db_app",  # название контейнера в docker-compose
                                       port="5432",
                                       database="postgres")
         print("Подключение к базе PostgreSQL выполнено")
@@ -79,7 +79,7 @@ def insert_json_db(date_downloads, time_downloads, r):
     try:
         connection = psycopg2.connect(user="postgres",
                                       password="postgres",
-                                      host="127.0.0.1",
+                                      host="db_app",  # название контейнера в docker-compose
                                       port="5432",
                                       database="postgres")
         print("Подключение к базе PostgreSQL для добавления json выполнено")

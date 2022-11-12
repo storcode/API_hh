@@ -1,5 +1,6 @@
 key_appid.py
 weather_city.json
+json_postgresql.py
 .idea
 __pycache__
 pgdata

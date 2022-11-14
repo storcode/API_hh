@@ -6,6 +6,7 @@ import psycopg2
 import json
 from psycopg2 import OperationalError
 from datetime import datetime
+import pytz
 
 
 def main():
@@ -30,8 +31,9 @@ def download():
     key_appid = key.key_appid
     url = f'https://api.openweathermap.org/data/2.5/weather?q=Cheboksary,ru&APPID={key_appid}&units=metric'
     r = requests.get(url=url).json()
-    date_downloads = datetime.today().strftime("%Y-%m-%d")
-    time_downloads = datetime.today().strftime("%H:%M:%S")
+    msc = pytz.timezone('europe/moscow')
+    date_downloads = datetime.now(msc).strftime("%Y-%m-%d")
+    time_downloads = datetime.now(msc).strftime("%H:%M:%S")
 
     with open('weather_city.json', 'w') as filename:
         json.dump(r, filename)

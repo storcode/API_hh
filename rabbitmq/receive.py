@@ -52,7 +52,7 @@ def create_connection_db():
         print("Подключение к базе PostgreSQL выполнено")
         cursor = connection.cursor()
         create_table_query = '''CREATE TABLE IF NOT EXISTS public.weather (
-                        id_weather int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                        id int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         date_downloads date,
                         time_downloads time,
                         coord json,
@@ -65,9 +65,7 @@ def create_connection_db():
                         dt int,
                         sys json,
                         timezone int,
-                        id int,
-                        name text,
-                        cod int
+                        name text
                         ); '''
 
         cursor.execute(create_table_query)
@@ -87,12 +85,11 @@ def insert_json_db(date_downloads, time_downloads, r):
         print("Подключение к базе PostgreSQL для добавления json выполнено")
         cursor = connection.cursor()
         cursor.execute(
-            "INSERT INTO public.weather (date_downloads,time_downloads,coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,id,name,cod)"
-            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            "INSERT INTO public.weather (date_downloads,time_downloads,coord,weather,base,main,visibility,wind,clouds,dt,sys,timezone,name)"
+            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             (date_downloads, time_downloads,
              json.dumps(r["coord"]), json.dumps(r["weather"]), r["base"], json.dumps(r["main"]), r["visibility"],
-             json.dumps(r["wind"]),
-             json.dumps(r["clouds"]), r["dt"], json.dumps(r["sys"]), r["timezone"], r["id"], r["name"], r["cod"]))
+             json.dumps(r["wind"]), json.dumps(r["clouds"]), r["dt"], json.dumps(r["sys"]), r["timezone"], r["name"]))
         connection.commit()
         count = cursor.rowcount
         print(count, "Запись успешно вставлена в таблицу")

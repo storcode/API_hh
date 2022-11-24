@@ -9,4 +9,4 @@
 # *  *  *  *  * user-name command to be executed
 
 */30 * * * *    /usr/local/bin/python /app/rabbitmq/send.py  >> /var/log/cron_docker_send.log
-*/30 * * * * /usr/local/bin/python /app/rabbitmq/receive.py >> /var/log/cron_docker_receive.log
+*/30 * * * *    /usr/local/bin/python /app/rabbitmq/receive.py >> /var/log/cron_docker_receive.log

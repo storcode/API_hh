@@ -22,6 +22,7 @@ services:
     volumes:
 #      - .:/docker-entrypoint-initdb.d # Разработчики официального образа PostgreSQL предусмотрели этот момент и предоставили нам специальную точку входа для инициализации БД
       - ./pgdata:/var/lib/postgresql/data  # сохраняем полученные данные здесь
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - '5433:5432'
 

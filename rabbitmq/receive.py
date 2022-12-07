@@ -10,7 +10,8 @@ from database import *
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
     channel = connection.channel()
-    channel.queue_declare(queue='connection_db', durable=True)  # нужно убедиться, что очередь переживет перезапуск RabbitMQ, для этого нам нужно объявить его устойчивым
+    channel.queue_declare(queue='connection_db', durable=True)  # нужно убедиться, что очередь переживет перезапуск
+    # RabbitMQ, для этого нам нужно объявить его устойчивым
 
     def do_work(ch, method, properties, body):
         resp = download()
@@ -44,10 +45,21 @@ def process_weather_data(r):
                                       port="5432",
                                       database="postgres")
         print("Подключение к базе PostgreSQL выполнено")
-        create_table_weather(connection)
-        print("Таблица успешно создана")
-        count = insert_weather(connection, date_downloads, time_downloads, r)
-        print(count, "Запись успешно вставлена в таблицу")
+        cursor = connection.cursor()
+        count_weather = insert_weather(cursor, date_downloads, time_downloads, r)
+        print(count_weather, "Запись успешно вставлена в таблицу 'weather'")
+        count_city_name = insert_city_name(cursor)
+        print(count_city_name, "Запись успешно вставлена в таблицу 'city_name'")
+        count_date_time_downloads = insert_date_time_downloads(cursor)
+        print(count_date_time_downloads, "Запись успешно вставлена в таблицу 'date_time_downloads'")
+        count_sun_light = insert_sun_light(cursor)
+        print(count_sun_light, "Запись успешно вставлена в таблицу 'sun_light'")
+        count_weather_temperature_params = insert_weather_temperature_params(cursor)
+        print(count_weather_temperature_params, "Запись успешно вставлена в таблицу 'weather_temperature_params'")
+        count_weather_wind_clouds_params = insert_weather_wind_clouds_params(cursor)
+        print(count_weather_wind_clouds_params, "Запись успешно вставлена в таблицу 'weather_wind_clouds_params'")
+        connection.commit()
+        cursor.close()
         connection.close()
         print("Соединение с PostgreSQL закрыто")
     except OperationalError as e:
